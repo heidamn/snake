@@ -48,6 +48,48 @@ class TheGame:
         pygame.draw.rect(self.screen, pygame.Color(colors[apple.colornum][0], colors[apple.colornum][1], colors[apple.colornum][2]),
                          (apple.position[0] * self.cell_size, apple.position[1] * self.cell_size, self.cell_size, self.cell_size))
 
+    def leaderboard(self, score):
+        try:
+            file = open("Score.txt").read()
+        except:
+            print ('Input your name:')
+            name = input()
+            newfile = '1 ' + name.upper() + ' ' + str(score) + '\n'
+            for i in range(2,11):
+                newfile += '{} EMPTY 0\n'.format(i)
+            print(newfile)
+            file = open("Score.txt", "w")
+            file.write(newfile)
+            file.close()
+        else:
+            positions = file.split('\n')
+            positions = positions[0:-1]
+            for place, position in enumerate(positions):
+                position = position.split(' ')
+                position[0], position[2] = int(position[0]), int(position[2])
+                positions[place] = position
+            for place, position in enumerate(positions):
+                if position[2] < score:
+                    print ('Input your name:')
+                    name = input()
+                    positions.insert(place, [place, name.upper(), score])
+                    pl = place
+                    break
+            else:
+                print (file)
+                return None
+            for place in range(pl, len(positions)):
+                positions[place][0] += 1
+            newfile =''
+            for place in range(10):
+                line = str(positions[place][0]) + ' ' + positions[place][1] + ' ' + str(positions[place][2])
+                newfile += line + '\n'
+            print (newfile)
+            file = open("Score.txt", "w")
+            file.write(newfile)
+            file.close()
+
+
     def run(self) -> None:
         """ Запустить игру """
         pygame.init()
@@ -81,6 +123,8 @@ class TheGame:
             clock.tick(self.speed)
         print ('Score:', snake.len-5)
         print ('Difficulty:', self.difficulty)
+
+        self.leaderboard(4)
         pygame.quit()
 
 
