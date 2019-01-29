@@ -1,6 +1,7 @@
 import random
 from copy import deepcopy
 import pygame
+import sys
 from pygame.locals import *
 
 
@@ -79,6 +80,7 @@ class TheGame:
             pygame.display.flip()
             clock.tick(self.speed)
         print ('Score:', snake.len-5)
+        print ('Difficulty:', self.difficulty)
         pygame.quit()
 
 
@@ -117,7 +119,6 @@ class Snake:
             apple.spawn(self.position)
         self.len = len(self.position)
 
-
     def alive(self):
         for part in range(1, len(self.position)):
             if self.position[part] == self.position[0]:
@@ -139,8 +140,9 @@ class Apple:
             self.position = (random.randint(0, game.cell_width - 1), random.randint(0, game.cell_height - 1))
 
 
-
 if __name__ == '__main__':
-    game = TheGame(600, 600, 20)
+    if len(sys.argv) > 1:
+        game = TheGame(600, 600, 20, difficulty=sys.argv[1])
+    else:
+        game = TheGame(600, 600, 20)
     game.run()
-
