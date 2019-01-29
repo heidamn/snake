@@ -7,7 +7,7 @@ from pygame.locals import *
 class TheGame:
     """класс визуализации и процесса игры"""
 
-    def __init__(self, width: int = 640, height: int = 480, cell_size: int = 10, speed: int = 10) -> None:
+    def __init__(self, width: int = 640, height: int = 480, cell_size: int = 10, speed: int = 10, difficulty: str = 'Easy') -> None:
         self.width = width
         self.height = height
         self.cell_size = cell_size
@@ -20,6 +20,8 @@ class TheGame:
         self.cell_height = self.height // self.cell_size
         # Скорость протекания игры
         self.speed = speed
+        # Сложность игры (Easy/Normal)
+        self.difficulty = difficulty
 
     def draw_grid(self) -> None:
         """ Отрисовать сетку """
@@ -68,7 +70,7 @@ class TheGame:
                         snake.move = "RIGHT"
                     elif (ev.key == pygame.K_UP or ev.key == ord('w')) and snake.move != "DOWN":
                         snake.move = "UP"
-            snake.update(apple)
+            snake.update(apple, self.difficulty)
             self.draw_apple(apple)
             self.draw_snake(snake)
             self.draw_grid()
@@ -86,7 +88,7 @@ class Snake:
         self.position = position
         self.len = len(self.position)
 
-    def update(self, apple):
+    def update(self, apple, difficulty):
         move = self.move
         end = self.position[-1]
         head = self.position[0]
@@ -100,11 +102,21 @@ class Snake:
             head = (head[0], head[1] + 1)
         for part in range(len(self.position) - 1, 0, -1):
             self.position[part] = self.position[part - 1]
+        if difficulty == "Easy":
+            if head[0] < 0:
+                head = (game.cell_width - 1, head[1])
+            elif head[0] == game.cell_width:
+                head = (0, head[1])
+            if head[1] < 0:
+                head = (head[0], game.cell_height - 1)
+            elif head[1] == game.cell_height:
+                head = (head[0], 0)
         self.position[0] = head
         if head == apple.position:
             self.position.append(end)
             apple.spawn(self.position)
         self.len = len(self.position)
+
 
     def alive(self):
         for part in range(1, len(self.position)):
