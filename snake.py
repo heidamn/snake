@@ -173,16 +173,15 @@ class TheGame:
             self.draw_apple(apple)
             self.draw_grid()
             if self.mode == '1player' or self.mode == 'AI':
-                if not snake.alive():
+                if not snake.alive() or snake.len == self.cell_height * self.cell_width:
                     running = False
             elif self.mode == '2players':
-                if not snake1.alive(snake2) and not snake2.alive(snake1):
+                if not snake1.alive(snake2) and not snake2.alive(snake1) or snake1.len == self.cell_height * self.cell_width or snake2.len == self.cell_height * self.cell_width:
                     running = False
                 if not snake1.alive(snake2):
                     snake1.death()
                 if not snake2.alive(snake1):
                     snake2.death()
-
             pygame.display.flip()
             clock.tick(self.speed)
         if self.mode == '1player' or self.mode == 'AI':
@@ -274,6 +273,9 @@ class Apple:
         self.colornum = colornum
 
     def spawn(self, snakeposition):
+        if len(snakeposition) == game.cell_width * game.cell_height:
+            self.position=(game.cell_width, game.cell_height)
+            return
         self.position = (random.randint(0, game.cell_width - 1), random.randint(0, game.cell_height - 1))
         self.colornum = random.randint(0, 5)
         while snakeposition.count(self.position) == 1:
@@ -282,7 +284,7 @@ class Apple:
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        game = TheGame(400, 500, 20, difficulty=sys.argv[1])
+        game = TheGame(200, 200, 20, difficulty=sys.argv[1])
     else:
-        game = TheGame(400, 400, 20)
+        game = TheGame(200, 200, 20)
     game.run()
