@@ -8,7 +8,7 @@ from pygame.locals import *
 class TheGame:
     """класс визуализации и процесса игры"""
 
-    def __init__(self, width: int = 640, height: int = 480, cell_size: int = 10, speed: int = 8, difficulty: str = 'Normal', mode: str = '2players') -> None:
+    def __init__(self, width: int = 640, height: int = 480, cell_size: int = 10, speed: int = 100, difficulty: str = 'Normal', mode: str = 'AI') -> None:
         self.width = width
         self.height = height
         self.cell_size = cell_size
@@ -35,14 +35,35 @@ class TheGame:
             pygame.draw.line(self.screen, pygame.Color('black'),
                              (0, y), (self.width, y))
 
-    def draw_snake(self, snake):
-        for p, part in enumerate(snake.position):
-            r = p % 2 + 2
-            b = p * 4
-            if 85 + b > 255:
-                b = 255 - 85
-            pygame.draw.rect(self.screen, pygame.Color(50 + b + 20 * (-1) ** (r), b, 85 + b),
-                                 (part[0] * self.cell_size, part[1] * self.cell_size, self.cell_size, self.cell_size))
+    def draw_snake(self, snake, *args):
+        if len(args):
+            if args[0] == 1:
+
+                for p, part in enumerate(snake.position):
+                    r = p % 2 + 2
+                    b = p * 4
+                    if 85 + b > 255:
+                        b = 255 - 85
+                    pygame.draw.rect(self.screen, pygame.Color(b, 50 + b + 20 * (-1) ** (r), 85 + b),
+                                     (part[0] * self.cell_size, part[1] * self.cell_size, self.cell_size,
+                                      self.cell_size))
+            elif args[0] == 2:
+                for p, part in enumerate(snake.position):
+                    r = p % 2 + 2
+                    b = p * 4
+                    if 85 + b > 255:
+                        b = 255 - 85
+                    pygame.draw.rect(self.screen, pygame.Color(85 + b, b, 50 + b + 20 * (-1) ** (r)),
+                                     (part[0] * self.cell_size, part[1] * self.cell_size, self.cell_size,
+                                      self.cell_size))
+        else:
+            for p, part in enumerate(snake.position):
+                r = p % 2 + 2
+                b = p * 4
+                if 85 + b > 255:
+                    b = 255 - 85
+                pygame.draw.rect(self.screen, pygame.Color(50 + b + 20 * (-1) ** (r), b, 85 + b),
+                                     (part[0] * self.cell_size, part[1] * self.cell_size, self.cell_size, self.cell_size))
 
     def draw_apple(self, apple):
         colors = [(154, 205, 50), (34, 139, 34), (205, 92, 92), (0, 250, 154), (0, 255, 0), (50, 205, 50)]
@@ -139,15 +160,16 @@ class TheGame:
                             snake2.move = "RIGHT"
                         elif ev.key == pygame.K_UP and snake2.move != "DOWN":
                             snake2.move = "UP"
-
+            if self.mode == "AI":
+                snake.think(apple.position)
             if self.mode == '1player' or self.mode == 'AI':
                 snake.update(apple, self.difficulty)
                 self.draw_snake(snake)
             elif self.mode == '2players':
                 snake1.update(apple, self.difficulty)
                 snake2.update(apple, self.difficulty)
-                self.draw_snake(snake1)
-                self.draw_snake(snake2)
+                self.draw_snake(snake1, 1)
+                self.draw_snake(snake2, 2)
             self.draw_apple(apple)
             self.draw_grid()
             if self.mode == '1player' or self.mode == 'AI':
@@ -176,6 +198,26 @@ class Snake:
         self.move = move
         self.position = position
         self.len = len(self.position)
+
+    def think(self, applepos):
+        if self.position[0][0] == game.cell_width - 1:
+            if self.move == 'DOWN':
+                self.move = 'LEFT'
+            else:
+                self.move = 'DOWN'
+        if self.position[0][0] == 1 and self.position[0][1] != 0 and self.position[0][1] != game.cell_height - 1:
+            if self.position[0][1] > applepos[1]:
+                self.move = 'LEFT'
+            elif self.move == 'DOWN':
+                self.move = 'RIGHT'
+            else:
+                self.move = 'DOWN'
+
+        if self.position[0][0] == 0:
+            if self.position[0][1] == 0:
+                self.move = 'RIGHT'
+            else:
+                self.move = 'UP'
 
     def update(self, apple, difficulty):
         if self.position:
